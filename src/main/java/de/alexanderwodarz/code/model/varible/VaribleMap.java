@@ -11,6 +11,10 @@ public class VaribleMap {
         return this;
     }
 
+    public VaribleMap put(String key, Object value){
+        return new VaribleBuilder(this).setKey(key).setValue(value).build();
+    }
+
     public VaribleBuilder put() {
         return new VaribleBuilder(this);
     }

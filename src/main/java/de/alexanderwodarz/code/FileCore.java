@@ -8,13 +8,13 @@ import java.io.IOException;
 
 public class FileCore {
 
-    public void createFile(String filePath) throws IOException {
+    public static void createFile(String filePath) throws IOException {
         createDirectory(filePath);
         File file = new File(filePath);
         file.createNewFile();
     }
 
-    public void createDirectory(String path) {
+    public static void createDirectory(String path) {
         String[] splitted = path.split("/");
         if (splitted[splitted.length - 1].contains(".")) {
             path = path.substring(0, path.lastIndexOf("/"));
@@ -29,42 +29,42 @@ public class FileCore {
         }
     }
 
-    public void appendFile(String file, String text) {
+    public static void appendFile(String file, String text) {
         appendFile(new File(file), text);
     }
 
-    public void appendFile(File file, String text) {
+    public static void appendFile(File file, String text) {
         appendFile(file, text, "UTF-8");
     }
 
     @SneakyThrows
-    public void appendFile(File file, String text, String charset) {
+    public static void appendFile(File file, String text, String charset) {
         if (!file.exists())
             createFile(file.getAbsolutePath());
         FileUtils.write(file, text, charset, true);
     }
 
-    public void writeFile(String file, String text) {
+    public static void writeFile(String file, String text) {
         writeFile(new File(file), text);
     }
 
-    public void writeFile(File file, String text) {
+    public static void writeFile(File file, String text) {
         writeFile(file, text, "UTF-8");
     }
 
     @SneakyThrows
-    public void writeFile(File file, String text, String charset) {
+    public static void writeFile(File file, String text, String charset) {
         if (!file.exists())
             createFile(file.getAbsolutePath());
         FileUtils.write(file, text, charset);
     }
 
-    public String readFile(String path) {
+    public static String readFile(String path) {
         return readFile(path, "UTF-8");
     }
 
     @SneakyThrows
-    public String readFile(String path, String charset) {
+    public static String readFile(String path, String charset) {
         File file = new File(path);
         if (!file.exists())
             return "";

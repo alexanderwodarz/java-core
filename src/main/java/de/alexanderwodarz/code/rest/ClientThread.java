@@ -4,7 +4,11 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.representation.Form;
+import com.sun.jersey.multipart.FormDataMultiPart;
+import com.sun.jersey.multipart.MultiPart;
+import com.sun.jersey.multipart.impl.MultiPartWriter;
 import org.json.JSONObject;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -13,7 +17,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.NewCookie;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
@@ -34,10 +37,13 @@ public class ClientThread extends Thread {
     private String rawBody;
     private boolean isRaw = false;
     private boolean isForm = false;
+    private boolean isMultiForm = false;
     private Form form;
+    private FormDataMultiPart multiPart;
+    private MultiPart part;
 
     public ClientThread(String url, RequestMethod method) {
-        this(url, method, null);
+        this(url, method, new DefaultClientConfig());
     }
 
     public ClientThread(String url, RequestMethod method, ClientConfig config) {
@@ -46,9 +52,10 @@ public class ClientThread extends Thread {
 
     public ClientThread(String url, RequestMethod method, ClientConfig config, int readTimeOut) {
         this.method = method;
-        if (config != null)
+        if (config != null) {
+            config.getClasses().add(MultiPartWriter.class);
             client = Client.create(config);
-        else
+        } else
             client = Client.create();
         client.setConnectTimeout(1500);
         client.setReadTimeout(readTimeOut);
@@ -150,6 +157,17 @@ public class ClientThread extends Thread {
         form.putSingle(key, value);
     }
 
+
+    public void addMultiPart(String key, String value) {
+        isMultiForm = true;
+        if (multiPart == null)
+            multiPart = new FormDataMultiPart();
+        multiPart = multiPart.field(key, value, MediaType.TEXT_PLAIN_TYPE);
+        part = multiPart;
+        part.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+        setMediaType(MediaType.MULTIPART_FORM_DATA);
+    }
+
     public void run() {
         switch (method) {
             case GET: {
@@ -172,7 +190,9 @@ public class ClientThread extends Thread {
                     builder = builder.header(stringStringEntry.getKey(), stringStringEntry.getValue());
                 }
                 ClientResponse response;
-                if (isForm)
+                if (isMultiForm)
+                    response = builder.post(ClientResponse.class, (part != null ? part : ""));
+                else if (isForm)
                     response = builder.post(ClientResponse.class, (form != null ? form : ""));
                 else if (!isRaw)
                     response = builder.post(ClientResponse.class, (body != null ? body.toString() : ""));
@@ -194,7 +214,9 @@ public class ClientThread extends Thread {
                 }
 
                 ClientResponse response;
-                if (isForm)
+                if (isMultiForm)
+                    response = builder.post(ClientResponse.class, (part != null ? part : ""));
+                else if (isForm)
                     response = builder.put(ClientResponse.class, (form != null ? form : ""));
                 else if (!isRaw)
                     response = builder.put(ClientResponse.class, (body != null ? body.toString() : ""));
@@ -206,8 +228,21 @@ public class ClientThread extends Thread {
                 break;
             }
             case DELETE: {
-                ClientResponse response = resource
-                        .delete(ClientResponse.class);
+                WebResource.Builder builder = resource.type(type);
+                for (Map.Entry<String, String> stringStringEntry : headers.entrySet()) {
+                    builder = builder.header(stringStringEntry.getKey(), stringStringEntry.getValue());
+                }
+                ClientResponse response;
+                if (isMultiForm)
+                    response = builder.post(ClientResponse.class, (part != null ? part : ""));
+                else if (isForm)
+                    response = builder.delete(ClientResponse.class, (form != null ? form : ""));
+                else if (!isRaw)
+                    response = builder.delete(ClientResponse.class, (body != null ? body.toString() : ""));
+                else
+                    response = builder.delete(ClientResponse.class, (rawBody != null ? rawBody.toString() : ""));
+
+
                 setResponse(response.getEntity(String.class));
                 setStatus(response.getStatus());
                 break;
