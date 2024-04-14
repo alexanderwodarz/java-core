@@ -1,5 +1,10 @@
 package de.alexanderwodarz.code.rest;
 
+import jakarta.ws.rs.client.*;
+import jakarta.ws.rs.core.Form;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
 import lombok.Getter;
 import lombok.Setter;
 import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
@@ -9,8 +14,6 @@ import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.json.JSONObject;
 
-import javax.ws.rs.client.*;
-import javax.ws.rs.core.*;
 import java.util.HashMap;
 import java.util.Map;
 
