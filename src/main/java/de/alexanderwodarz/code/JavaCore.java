@@ -3,9 +3,7 @@ package de.alexanderwodarz.code;
 import de.alexanderwodarz.code.log.Level;
 import de.alexanderwodarz.code.log.Log;
 import de.alexanderwodarz.code.log.ModOutputStream;
-import de.alexanderwodarz.code.rest.ClientThread;
 
-import javax.ws.rs.core.NewCookie;
 import java.io.PrintStream;
 import java.text.Normalizer;
 import java.util.Locale;
