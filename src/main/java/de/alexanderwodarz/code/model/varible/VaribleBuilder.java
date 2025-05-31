@@ -21,9 +21,7 @@ public class VaribleBuilder {
     }
 
     public VaribleMap build() {
-        Varible varible = new Varible();
-        varible.setKey(key);
-        varible.setValue(value);
+        Varible varible = new Varible(key, value);
         map.put(varible);
         return map;
     }
